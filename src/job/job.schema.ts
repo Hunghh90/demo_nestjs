@@ -20,5 +20,8 @@ export class Job{
 
     @Prop()
     createdAt:Date
+
+    @Prop()
+    updatedAt:Date
 }
 export const JobSchema = SchemaFactory.createForClass(Job);

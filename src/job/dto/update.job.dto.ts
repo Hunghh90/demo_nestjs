@@ -11,4 +11,6 @@ export class UpdateJobDto{
     @IsOptional()
     @IsString()
     description?:string
+
+    updatedAt:Date
 }
