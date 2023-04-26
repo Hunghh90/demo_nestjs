@@ -18,6 +18,7 @@ import { Request } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { ObjectId } from 'mongoose';
 import { ApiTags } from '@nestjs/swagger';
+import { Job } from './job.schema';
 @Controller('job')
 export class JobController{
     constructor(private jobService:JobService){}
@@ -44,18 +45,18 @@ export class JobController{
     }
     @ApiTags("Job")
     @UseGuards(AuthGuard("jwt"))
-    @Patch('update')
+    @Patch('update/:id')
     updateJob(
-        @Param('_id') jobId:ObjectId,
+        @Param('id') jobId:ObjectId,
         @Body() updateJobDto:UpdateJobDto
     ){
         return  this.jobService.updateJob(jobId,updateJobDto)
     }
     @ApiTags("Job")
     @UseGuards(AuthGuard("jwt"))
-    @Delete('delete')
-    deleteJob(@Query("_id")noteId:ObjectId){
-       return this.jobService.deleteJob(noteId)
+    @Delete('delete/:id')
+    deleteJob(@Param("id")jobId:ObjectId){
+       return this.jobService.deleteJob(jobId)
     }
 }
 

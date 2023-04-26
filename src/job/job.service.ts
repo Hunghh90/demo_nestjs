@@ -32,8 +32,6 @@ export class JobService {
             userId,
             createdAt:now()
            
-    
-           
         })
         
         return jobCreate.save()
@@ -43,9 +41,15 @@ export class JobService {
         jobId:object,
         updateJobDto:UpdateJobDto
     ){
-        const jobUpdate = await this.jobModel.findByIdAndUpdate(jobId,updateJobDto)
-        return jobUpdate
+        const jobUpdate = await this.jobModel.findByIdAndUpdate(jobId,{
+            ...updateJobDto,
+            updatedAt:now()
+        })
+        return "Done"
     }
 
-    deleteJob(noteId:object){}
+    async deleteJob(jobId:object){
+        await this.jobModel.findByIdAndDelete(jobId)
+        return "Done"
+    }
 }
