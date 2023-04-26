@@ -6,6 +6,7 @@ export type AuthSchema = HydratedDocument<User>
 @Schema()
 export class User{
     _id?:ObjectId
+    
     @Prop()
     email:string
 

@@ -19,24 +19,24 @@ export class AuthService{
         // private configService:ConfigService
         ) {}
 
-    async register(authDto:AuthDto):Promise<User>{
+        async register(authDto:AuthDto):Promise<User> {
 
-        const user = await this.userModel.findOne({email:authDto.email})
-        if(user){
-            throw new ForbiddenException("Email is exist")
+            const user = await this.userModel.findOne({email:authDto.email})
+            if(user){
+                throw new ForbiddenException("Email is exist")
+            }
+            if(authDto.password != authDto.confirmPassword) {
+                throw new ForbiddenException("Confirm password is not correct")
+            }
+            const  hashPassword = await argon.hash(authDto.password)
+            const createUser = new this.userModel({
+                email:authDto.email,
+                password:hashPassword
+            });
+            return createUser.save();
         }
-        if(authDto.password != authDto.confirmPassword){
-            throw new ForbiddenException("Confirm password is not correct")
-        }
-          const  hashPassword = await argon.hash(authDto.password)
-          const createUser = new this.userModel({
-            email:authDto.email,
-            password:hashPassword
-          });
-          return createUser.save();
-    }
 
-        async login(authLoginDto:AuthLoginDto){
+        async login(authLoginDto:AuthLoginDto) {
             const user = await this.userModel.findOne({email:authLoginDto.email})
             if(!user){
                 throw new ForbiddenException("User not found")
@@ -52,12 +52,12 @@ export class AuthService{
             return await this.convertToJwtString(user._id,user.email)
         }
 
-        async convertToJwtString(userId:object, email:string):Promise<{accessToken:string}>{
+        async convertToJwtString(userId:object, email:string):Promise<{accessToken:string}> {
             const payload = {
                 sub:userId,
                 email
             }
-            const jwtString =await this.jwtService.signAsync(payload,{
+            const jwtString =await this.jwtService.signAsync(payload, {
                 expiresIn:"10m",
                 secret: jwtConstants.secret
             })

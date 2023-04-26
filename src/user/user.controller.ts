@@ -12,12 +12,12 @@ import { User } from 'src/auth/auth.schema';
 import { GetUser } from 'src/auth/decorator';
 
 @Controller('user')
+@ApiTags("User")
 export class UserController {
-    @ApiTags("User")
+    
     @UseGuards(AuthGuard("jwt"))
     @Get('me')
     async me(@GetUser() user:User){
-       
         return user._id
     }
 }

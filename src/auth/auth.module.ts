@@ -9,15 +9,15 @@ import { JwtStrategy } from "./strategy/jwt.strategy";
 import { ConfigModule } from "@nestjs/config";
 @Module({
     imports:[ 
-    MongooseModule.forFeature([{name:User.name, schema:UserSchema}]),
-    JwtModule.register({ global: true,}),
+        MongooseModule.forFeature([{name:User.name, schema:UserSchema}]),
+        JwtModule.register({ global: true,}),
     ],
-   controllers:[AuthController],
-   providers:[
-    AuthService,
-    JwtStrategy
-]
+    controllers:[
+        AuthController
+    ],
+    providers:[
+        AuthService,
+        JwtStrategy
+    ]
 })
-export class AuthModule{
-
-}
+export class AuthModule{}

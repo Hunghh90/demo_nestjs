@@ -6,6 +6,7 @@ export type JobSchema = HydratedDocument<Job>
 @Schema()
 export class Job{
     _id:ObjectId
+    
     @Prop()
     title:string
 

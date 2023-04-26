@@ -4,19 +4,19 @@ import { AuthDto } from "./dto/auth.dto";
 import { AuthLoginDto } from "./dto/auth-login.dto";
 import { ApiTags } from "@nestjs/swagger";
 @Controller("auth")
+@ApiTags("Auth")
 export class AuthController{
-    constructor(private authService:AuthService){
+    constructor(private authService:AuthService) {
 
     }
-    @ApiTags("Auth")
-    @Post("login")
-    login(@Body() body:AuthLoginDto){
     
+    @Post("login")
+    login(@Body() body:AuthLoginDto) {
         return this.authService.login(body);
     }
-    @ApiTags("Auth")
+    
     @Post("register")
-    register(@Body() body:AuthDto){
+    register(@Body() body:AuthDto) {
         return this.authService.register(body);
     }
 

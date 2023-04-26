@@ -10,9 +10,11 @@ import { Job, JobSchema } from './job.schema';
         MongooseModule.forFeature([{name:Job.name, schema:JobSchema}]),
         JwtModule.register({ global: true,}),
     ],
-    controllers:[JobController],
-    providers:[JobService]
+    controllers:[
+        JobController
+    ],
+    providers:[
+        JobService
+    ]
 })
-export class JobModule {
-    
-}
+export class JobModule {}

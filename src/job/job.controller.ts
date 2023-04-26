@@ -20,43 +20,53 @@ import { ObjectId } from 'mongoose';
 import { ApiTags } from '@nestjs/swagger';
 import { Job } from './job.schema';
 @Controller('job')
+@ApiTags("Job")
+@UseGuards(AuthGuard("jwt"))
 export class JobController{
     constructor(private jobService:JobService){}
-    @ApiTags("Job")
-    @UseGuards(AuthGuard("jwt"))
+    
+    
     @Get('getJob')
-    getJob(@GetUser("_id") user:ObjectId){
-        return this.jobService.getJob(user)
+    async getJob(@GetUser("_id") userId:ObjectId) {
+        const data = await this.jobService.getJob(userId)
+        return data
     }
-    @ApiTags("Job")
-    @UseGuards(AuthGuard("jwt"))
-    @Get(":id")
-    getJobById(@Param('_id') jobId:ObjectId){
-        return this.jobService.getJobById(jobId)
+    
+    
+    @Get("get/:id")
+    async getJobById(@Param('id') jobId:ObjectId) {
+        const data = await this.jobService.getJobById(jobId)
+        return data
     }
-    @ApiTags("Job")
-    @UseGuards(AuthGuard("jwt"))
+   
+    
     @Post('create')
-    createJob(
+    async createJob(
         @GetUser("_id") userId:ObjectId,
         @Body() insertJobDto:InsertJobDto
-    ){
-        return this.jobService.createJob(userId,insertJobDto)
+    ) {
+        const data = await this.jobService.createJob(userId,insertJobDto)
+        return data
     }
-    @ApiTags("Job")
-    @UseGuards(AuthGuard("jwt"))
+   
+    
     @Patch('update/:id')
-    updateJob(
+    async updateJob(
+        @GetUser("_id") userId:ObjectId,
         @Param('id') jobId:ObjectId,
         @Body() updateJobDto:UpdateJobDto
-    ){
-        return  this.jobService.updateJob(jobId,updateJobDto)
+    ) {
+        const data = await  this.jobService.updateJob(userId,jobId,updateJobDto)
+        return data
     }
-    @ApiTags("Job")
-    @UseGuards(AuthGuard("jwt"))
+    
+    
     @Delete('delete/:id')
-    deleteJob(@Param("id")jobId:ObjectId){
-       return this.jobService.deleteJob(jobId)
+    async deleteJob(
+        @GetUser("_id") userId:ObjectId,
+        @Param("id")jobId:ObjectId) {
+        const data = await this.jobService.deleteJob(userId,jobId)
+        return data
     }
 }
 
