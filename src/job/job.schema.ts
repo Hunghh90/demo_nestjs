@@ -1,11 +1,11 @@
 import { Schema, Prop, SchemaFactory} from "@nestjs/mongoose";
-import { HydratedDocument } from 'mongoose';
+import { HydratedDocument, ObjectId } from 'mongoose';
 
 
 export type JobSchema = HydratedDocument<Job>
 @Schema()
 export class Job{
-
+    _id:ObjectId
     @Prop()
     title:string
 

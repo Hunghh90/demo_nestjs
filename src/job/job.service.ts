@@ -39,10 +39,13 @@ export class JobService {
         return jobCreate.save()
     }
 
-    updateJob(
+    async updateJob(
         jobId:object,
         updateJobDto:UpdateJobDto
-    ){}
+    ){
+        const jobUpdate = await this.jobModel.findByIdAndUpdate(jobId,updateJobDto)
+        return jobUpdate
+    }
 
     deleteJob(noteId:object){}
 }
