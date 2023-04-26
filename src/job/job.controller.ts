@@ -39,15 +39,15 @@ export class JobController{
         return this.jobService.createJob(userId,insertJobDto)
     }
     @UseGuards(AuthGuard("jwt"))
-    @Patch()
+    @Patch('update')
     updateJob(
-        @GetUser('_id') jobId:ObjectId,
+        @Param('_id') jobId:ObjectId,
         @Body() updateJobDto:UpdateJobDto
     ){
         return  this.jobService.updateJob(jobId,updateJobDto)
     }
     @UseGuards(AuthGuard("jwt"))
-    @Delete()
+    @Delete('delete')
     deleteJob(@Query("_id")noteId:ObjectId){
        return this.jobService.deleteJob(noteId)
     }
