@@ -10,13 +10,13 @@ export class AuthDto {
     @IsString()
     @MinLength(6, {message: 'Password must be at least 8 characters'})
     @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {message: 'password too weak'})
-    password:string
+    password: string
     
 
     @ApiProperty()
     @IsEmail()
     @IsNotEmpty()
-    email:string
+    email: string
 
    
 }

@@ -38,8 +38,9 @@ export class UserController {
   }
 
     @Get('getByEmail')
-    async getByEmail(@Body() request:any) {
-        const obj = await this.userService.getByEmail(request);
+    async getByEmail(@Body('email') body:string) {
+        console.log(body)
+        const obj = await this.userService.getByEmail(body);
         return obj
     }
 

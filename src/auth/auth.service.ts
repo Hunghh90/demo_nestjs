@@ -21,8 +21,8 @@ export class AuthService {
         ) {}
 
         async register(createUserDto: CreateUserDto):Promise<any> {
-
-            const user = await this.userService.getByEmail({email:createUserDto.email})
+          console.log(createUserDto.email)
+            const user = await this.userService.getByEmail(createUserDto.email)
             if(user){
                 throw new UnprocessableEntityException("Email is exist")
             }
@@ -41,7 +41,7 @@ export class AuthService {
 
         async login(authDto:AuthDto) {
             console.log(authDto.email)
-            const user = await this.userService.getByEmail({email:authDto.email})
+            const user = await this.userService.getByEmail(authDto.email)
             if(!user) throw new BadRequestException('User does not exist')
             const checkPassword = await argon.verify(
                 user.password,
