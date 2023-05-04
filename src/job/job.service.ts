@@ -1,72 +1,90 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InsertJobDto, UpdateJobDto } from './dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Job } from './job.schema';
 import { Model, ObjectId, now } from 'mongoose';
-import { User } from './../auth/auth.schema';
-import { title } from 'process';
+import { User } from './../user/user.schema';
+
+
 
 @Injectable()
 export class JobService {
     constructor(
-        @InjectModel(Job.name) private jobModel: Model<Job>,
-        @InjectModel(Job.name) private userModel: Model<User>
+        @InjectModel( Job.name ) private jobModel: Model<Job>,
+        @InjectModel( Job.name ) private userModel: Model<User>
     ){}
 
     async getJob(userId:ObjectId) {
-        const job = await this.jobModel.find({userId:userId})
-        if(job == null){
-            throw new ForbiddenException("404 Not Found")
+        try {
+            const job = await this.jobModel.find({ userId:userId })
+            if( job.length == 0 ) {
+                throw new HttpException( "Not Found", HttpStatus.NOT_FOUND )
+            }
+            return job
+        } catch {
+            throw new HttpException( "Not Found", HttpStatus.NOT_FOUND )
         }
-        return job
+      
     }
     
 
     async getJobById(jobId:object) {
-        const job = await this.jobModel.findById(jobId)
-        if(job == null){
-            throw new ForbiddenException("404 Not Found")
+        try{
+            const job = await this.jobModel.findById(jobId.toString)
+            console.log(job)
+            if( job == null ) {
+                throw new HttpException( "Not Found", HttpStatus.NOT_FOUND )
+            }
+            return job
+        }catch{
+            throw new HttpException( "Not Found", HttpStatus.NOT_FOUND )
         }
-        return job
+       
     }
 
     async createJob(
-        userId:ObjectId,
+        userId:User,
         insertJobDto:InsertJobDto
     ) {
-        const jobCreate = await new this.jobModel({
-            ...insertJobDto,
-            userId,
-            createdAt:now()
-        })
+        try {
+            const jobCreate = await new this.jobModel({
+                ...insertJobDto,
+                userId,
+                createdAt:now()
+            })
+            return jobCreate.save()
+        } catch {
+            throw new HttpException('message', HttpStatus.BAD_REQUEST)
+        }
+
         
-        return jobCreate.save()
+       
     }
 
     async updateJob(
-        userId:ObjectId,
-        jobId:ObjectId,
-        updateJobDto:UpdateJobDto
+        user: User,
+        jobId: ObjectId,
+        updateJobDto: UpdateJobDto
     ) {
+        
         const job = await this.jobModel.findById(jobId)
-        const newObjectId= userId.toString()
-        if(newObjectId !== job.userId) {
+        if(user._id.toString() !== job.userId.toString()) {
             throw new ForbiddenException("Incorrect information")
         }
         const jobUpdate = await this.jobModel.findByIdAndUpdate(jobId, {
             ...updateJobDto,
-            updatedAt:now()
+            updatedAt: now()
         })
         return "Done"
     }
 
     async deleteJob(
-        userId:ObjectId,
-        jobId:ObjectId
+        user: User,
+        jobId: ObjectId
         ) {
         const job = await this.jobModel.findById(jobId)
-        const newObjectId= userId.toString()
-        if(newObjectId !== job.userId) {
+  
+        if(user._id.toString() !== job.userId.toString())  {
             throw new ForbiddenException("Incorrect information")
         }
         await this.jobModel.findByIdAndDelete(jobId)

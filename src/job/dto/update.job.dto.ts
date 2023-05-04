@@ -5,12 +5,12 @@ export class UpdateJobDto{
     @ApiProperty()
     @IsString()
     @IsOptional()
-    title?:string
+    title?: string
 
     @ApiProperty()
     @IsOptional()
     @IsString()
-    description?:string
+    description?: string
 
-    updatedAt:Date
+    updatedAt: Date
 }

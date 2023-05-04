@@ -4,23 +4,34 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { jwtConstants } from '../constants';
 import { InjectModel } from '@nestjs/mongoose';
-import { User } from '../auth.schema';
+
 import { Model } from 'mongoose';
+import { User } from './../../user/user.schema';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
-    constructor(@InjectModel(User.name) private userModel: Model<User>,) {
+    constructor(
+        private readonly userService: UserService,
+        private readonly configService: ConfigService,
+    ) {
+       
         super({
-            jwtFromRequest : ExtractJwt.fromAuthHeaderAsBearerToken(),
-            secretOrKey: jwtConstants.secret
-        })
+            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+            ignoreExpiration: false,
+            secretOrKey: process.env.JWT_SECRET,
+            passReqToCallback: true,
+        });
     }
     
-    async validate(payload:{sub:object, email:string}) {
-    const user = await this.userModel.findById(payload.sub);
+    async validate(req: any, payload:any) {
+      console.log(req,"req");
+      console.log("payload",payload);
+    const user = await this.userService.getByEmail(payload.email);
     if(user ==null) {
         throw new ForbiddenException("404 Not Found")
     }
-    return user;
+    // req.user =user;
+    return payload;
     }
 }

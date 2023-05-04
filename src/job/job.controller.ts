@@ -13,12 +13,10 @@ import {
 import { JobService } from './job.service';
 import { GetUser } from './../auth/decorator';
 import { InsertJobDto, UpdateJobDto } from './dto';
-import { User } from 'src/auth/auth.schema';
-import { Request } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { ObjectId } from 'mongoose';
 import { ApiTags } from '@nestjs/swagger';
-import { Job } from './job.schema';
+import { User } from './../user/user.schema';
 @Controller('job')
 @ApiTags("Job")
 @UseGuards(AuthGuard("jwt"))
@@ -42,30 +40,30 @@ export class JobController{
     
     @Post('create')
     async createJob(
-        @GetUser("_id") userId:ObjectId,
+        @GetUser('_id') user:User,
         @Body() insertJobDto:InsertJobDto
     ) {
-        const data = await this.jobService.createJob(userId,insertJobDto)
+        const data = await this.jobService.createJob(user,insertJobDto)
         return data
     }
    
     
     @Patch('update/:id')
     async updateJob(
-        @GetUser("_id") userId:ObjectId,
+        @GetUser('_id') user:User,
         @Param('id') jobId:ObjectId,
         @Body() updateJobDto:UpdateJobDto
     ) {
-        const data = await  this.jobService.updateJob(userId,jobId,updateJobDto)
+        const data = await  this.jobService.updateJob(user,jobId,updateJobDto)
         return data
     }
     
     
     @Delete('delete/:id')
     async deleteJob(
-        @GetUser("_id") userId:ObjectId,
+        @GetUser() user:User,
         @Param("id")jobId:ObjectId) {
-        const data = await this.jobService.deleteJob(userId,jobId)
+        const data = await this.jobService.deleteJob(user,jobId)
         return data
     }
 }

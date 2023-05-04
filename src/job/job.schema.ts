@@ -1,28 +1,32 @@
 import { Schema, Prop, SchemaFactory} from "@nestjs/mongoose";
 import { HydratedDocument, ObjectId } from 'mongoose';
+import * as mongoose from 'mongoose';
+
 
 
 export type JobSchema = HydratedDocument<Job>
 @Schema()
-export class Job{
-    _id:ObjectId
+export class Job {
+    // _id: string
     
     @Prop()
-    title:string
+    title: string
 
     @Prop()
-    description:string
+    description: string
 
     @Prop()
-    email?:string
+    email?: string
+
+ 
+
+    @Prop({ type: mongoose.Schema.Types.ObjectId})
+    userId: ObjectId;
 
     @Prop()
-    userId?:string
+    createdAt: Date
 
     @Prop()
-    createdAt:Date
-
-    @Prop()
-    updatedAt:Date
+    updatedAt: Date
 }
 export const JobSchema = SchemaFactory.createForClass(Job);

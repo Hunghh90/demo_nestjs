@@ -8,20 +8,20 @@ export class InsertJobDto{
     @ApiProperty()
     @IsString()
     @IsNotEmpty()
-    title:string
+    title: string
 
     
     @ApiProperty()
     @IsString()
-    description:string
+    description: string
 
    
     @ApiProperty()
-    email:string
+    email: string
 
 
-    userId:ObjectId
+    userId: ObjectId
 
-    createdAt:Date
+    createdAt: Date
 
 }
