@@ -40,7 +40,6 @@ export class AuthService {
         }
 
         async login(authDto:AuthDto) {
-            console.log(authDto.email)
             const user = await this.userService.getByEmail(authDto.email)
             if(!user) throw new BadRequestException('User does not exist')
             const checkPassword = await argon.verify(
@@ -48,7 +47,6 @@ export class AuthService {
                 authDto.password,
             )
             if(!checkPassword) throw new BadRequestException('Password is incorrect');
-            
             const tokens = await this.getTokens(user._id, user.email);
             await this.updateRefreshToken(user._id, tokens.refreshToken);
             return tokens;
@@ -86,9 +84,7 @@ export class AuthService {
               accessToken,
               refreshToken,
             };
-          }
-        
-    
+          }  
         async updateRefreshToken(id: ObjectId, refreshToken: string) {
             const hashedRefreshToken = await argon.hash(refreshToken);
             await this.userService.update(id, {

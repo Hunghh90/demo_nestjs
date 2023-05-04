@@ -20,7 +20,7 @@ export class UserService {
         return createdUser.save();
     }
 
-    async getByEmail(email: any) {
+    async getByEmail(email: string) {
         return this.userModel.findOne({email: email}).exec();
     }
 
