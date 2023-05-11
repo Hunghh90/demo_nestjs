@@ -24,6 +24,7 @@ export class AuthService {
     }
 
     async login(loginDto: LoginDto) {
+       try{
         const user = await this.userService.getByEmail(loginDto.email);
         const ckeckPassword = await argon.verify(
             user.password,
@@ -33,11 +34,14 @@ export class AuthService {
             throw new HttpException("Invalid credentials", HttpStatus.UNAUTHORIZED);
         }
         const token = await this.createToken(user);
-        await this.updateRefreshToken(user,token.refreshToken)
+        await this.updateRefreshToken(user,token.refreshToken);
         return {
             email: user.email,
             ...token
         }
+       }catch(e) {
+            throw new HttpException("Invalid credentials", HttpStatus.UNAUTHORIZED);
+       }
     }
 
     async logout(email: string) {

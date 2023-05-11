@@ -21,6 +21,12 @@ export class UserUpdateDto {
     password?: string
 
     @ApiProperty()
+    confirmPassword?: string
+
+    @ApiProperty()
+    oldPassword?: string
+
+    @ApiProperty()
     refreshToken?: string
 
     @ApiProperty()

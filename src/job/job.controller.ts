@@ -15,10 +15,6 @@ import {
     JobUpdateDto
 } from './dto';
 import { AuthGuard } from '@nestjs/passport';
-import { User } from 'src/user/user.schema';
-import { Roles } from '../decorator/role.decorator';
-import { Role } from '../enum/roles.enum';
-import { RolesGuard } from 'src/guard/role-guard.guard';
 import { Permission } from 'src/enum/permission.enum';
 import { PermissionsGuard } from 'src/guard/permission-guard.guard';
 import { Permissions } from 'src/decorator/permission-decorator.decorator';
@@ -62,16 +58,16 @@ export class JobController {
     @Permissions(Permission.Create)
     @Patch(':id')
     async update(
-        @Param('id') id: string,
+        @Param('id') id: any,
         @Body() body: JobUpdateDto
     ) {
         return this.jobService.update(id,body);
     }
-    
+
     @UseGuards(PermissionsGuard)
     @Permissions(Permission.Create)
     @Delete(':id')
-    async remove( @Param('id') id: string) {
+    async remove( @Param('id') id: any) {
         return this.jobService.remove(id);
     }
 }

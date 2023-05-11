@@ -50,15 +50,29 @@ export class UserService {
         email: any,
         userUpdateDto: UserUpdateDto,
     ) {
-        if(userUpdateDto.roles){
-            return await this.userModel.findOneAndUpdate({email:email}, userUpdateDto)
+        if(userUpdateDto.roles || userUpdateDto.permissions || userUpdateDto.userName) {
+            return await this.userModel.findOneAndUpdate({email:email}, userUpdateDto, {new: true});
         }
-        await this.userModel
-        .updateOne({email:email}, userUpdateDto)
+        if(userUpdateDto.password) {
+            const checkUser = await this.userModel.findOne({email: email});
+            const ckeckPassword = await argon.verify(
+                checkUser.password,
+                userUpdateDto.oldPassword
+            )
+            if(!ckeckPassword) {
+                throw new HttpException("Invalid credentials", HttpStatus.BAD_REQUEST);
+            }
+            if(userUpdateDto.password !== userUpdateDto.confirmPassword) {
+                throw new HttpException("Confirm password is not correct", HttpStatus.BAD_REQUEST);
+            }
+            const hashPassword = await argon.hash(userUpdateDto.password) ;
+            return await this.userModel.findOneAndUpdate({email:email}, {...userUpdateDto, password: hashPassword}, {new: true});
+        }
+        await this.userModel.updateOne({email:email}, userUpdateDto,)
         return {
         statuscode:200
         }
     }
 
-    async remove(){}
+    async remove() {}
 }
