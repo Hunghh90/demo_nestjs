@@ -1,43 +1,64 @@
-import { ForbiddenException, HttpException, HttpStatus, Injectable, UnprocessableEntityException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './user.schema';
-import { Model, ObjectId } from 'mongoose';
-import { CreateUserDto, UpdateUserDto } from './dto';
+import { Model } from 'mongoose';
+import { UserCreateDto, UserUpdateDto } from './dto';
 import * as argon from 'argon2';
-import { Request } from 'express';
 @Injectable()
 export class UserService {
-    constructor(
-        @InjectModel(User.name) private userModel: Model<User>,
-    ) {}
+    constructor( @InjectModel(User.name) private userModel : Model<User>){}
 
     async getAll(): Promise<User[]> {
         return this.userModel.find().exec();
+        
     }
 
-    async create(createUserDto: CreateUserDto): Promise<User> {
-        const createdUser = new this.userModel(createUserDto);
-        return createdUser.save();
+    async getById(id: string): Promise<User> {
+        const user = await this.userModel.findById(id);
+        if(!user) {
+            throw new HttpException("User not found", HttpStatus.UNAUTHORIZED);
+        }
+        return user;
     }
 
     async getByEmail(email: string) {
-        return this.userModel.findOne({email: email}).exec();
+        const user = await this.userModel.findOne({email: email});
+        if(!user) {
+            throw new HttpException("User not found", HttpStatus.UNAUTHORIZED);
+        }
+        return user;
     }
 
-    async getById(id: ObjectId): Promise<User> {
-        return this.userModel.findById(id)
+    async create(createUserDto: UserCreateDto): Promise<User> {
+        const user = await this.userModel.findOne({email:createUserDto.email});
+        if(user) {
+            throw new HttpException("Email is already", HttpStatus.BAD_REQUEST);
+        }
+         
+        if(createUserDto.password !== createUserDto.confirmPassword) {
+            throw new HttpException("Confirm password is not correct", HttpStatus.BAD_REQUEST);
+        }
+         const hashPassword = await argon.hash(createUserDto.password) ;
+        const createUser = await new this.userModel({
+            ...createUserDto,
+            password: hashPassword
+        });
+        return createUser.save();
     }
 
     async update(
-        id: ObjectId,
-        updateUserDto: UpdateUserDto,
-        ): Promise<any> {
-        return await this.userModel
-            .updateOne({_id: id}, updateUserDto)
-        
+        email: any,
+        userUpdateDto: UserUpdateDto,
+    ) {
+        if(userUpdateDto.roles){
+            return await this.userModel.findOneAndUpdate({email:email}, userUpdateDto)
+        }
+        await this.userModel
+        .updateOne({email:email}, userUpdateDto)
+        return {
+        statuscode:200
+        }
     }
-    
-    async remove(id: ObjectId): Promise<User> {
-        return this.userModel.findByIdAndDelete(id).exec();
-    }
+
+    async remove(){}
 }

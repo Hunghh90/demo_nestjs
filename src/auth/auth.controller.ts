@@ -1,43 +1,36 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from "@nestjs/common";
-import { AuthService } from "./auth.service";
-import { AuthDto } from "./dto/auth.dto";
-import { ApiTags } from "@nestjs/swagger";
-import { CreateUserDto } from "src/user/dto";
-import { Request } from "express";
-import { AccessTokenGuard, RefreshTokenGuard } from "./../common/guards";
-@Controller("auth")
-@ApiTags("Auth")
+import { Controller, Post, Body, UseGuards, Get, Req } from '@nestjs/common';
+import { AuthService } from './auth.service';
+import { UserCreateDto } from 'src/user/dto';
+import { LoginDto } from './dto/login.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { RefreshTokenGuard } from './refresh-guard.guard';
+
+@Controller('auth')
 export class AuthController {
-    constructor(private authService:AuthService) {
+    constructor(private readonly authService: AuthService) {}
 
+    @Post('register')
+    async register(@Body() userCreateDto: UserCreateDto) {
+        return await this.authService.register(userCreateDto);
     }
-    
-    @Post("login")
-    async login(@Body() body:AuthDto) {
-        const obj = await this.authService.login(body);
-        return obj;
+
+    @Post('login')
+    async login(@Body() loginDto: LoginDto) {
+        return await this.authService.login(loginDto);
     }
-    
-    @Post("register")
-    async register(@Body() body:CreateUserDto) {
-        const obj = await this.authService.register(body);
-        return obj;
-    }
-   @UseGuards(AccessTokenGuard)
-    @Get('logout')
-    async logout(@Req() req: Request) { 
-        console.log(req.user)
-        this.authService.logout(req.user['sub']);
-    }
-    
-    @UseGuards(RefreshTokenGuard)
+    @UseGuards(AuthGuard('jwt'))
     @Get('refresh')
-    async refreshTokens(@Req() req: Request) {
-        const _id = req.user['sub'];
-      
-        const refreshToken = req.user['refreshToken'];
-        return this.authService.refreshTokens(_id, refreshToken);
+    async refreshTokens(@Req() req: any) {
+        const email = req.user.email;
+        const refreshToken = req.user.refreshToken;
+        return this.authService.refreshToken(email, refreshToken);
     }
 
-   
+    @UseGuards(AuthGuard('jwt'))
+    @Get('logout')
+    async logout(@Req() req: any) { 
+        this.authService.logout(req.user.email);
+        return "200"
+    }
+    
 }

@@ -1,72 +1,77 @@
 import { 
     Controller,
     Get,
-    Patch,
     Post,
+    Patch,
     Delete,
-    Param,
     Body,
-    Req,
+    Param,
     UseGuards,
-    Query
-     } from '@nestjs/common'
+    Req
+} from '@nestjs/common';
 import { JobService } from './job.service';
-import { GetUser } from './../auth/decorator';
-import { InsertJobDto, UpdateJobDto } from './dto';
+import { 
+    JobCreateDto,
+    JobUpdateDto
+} from './dto';
 import { AuthGuard } from '@nestjs/passport';
-import { ObjectId } from 'mongoose';
-import { ApiTags } from '@nestjs/swagger';
-import { User } from './../user/user.schema';
+import { User } from 'src/user/user.schema';
+import { Roles } from '../decorator/role.decorator';
+import { Role } from '../enum/roles.enum';
+import { RolesGuard } from 'src/guard/role-guard.guard';
+import { Permission } from 'src/enum/permission.enum';
+import { PermissionsGuard } from 'src/guard/permission-guard.guard';
+import { Permissions } from 'src/decorator/permission-decorator.decorator';
+
+
+@UseGuards(AuthGuard('jwt'))
 @Controller('job')
-@ApiTags("Job")
-@UseGuards(AuthGuard("jwt"))
-export class JobController{
-    constructor(private jobService:JobService){}
-    
-    
-    @Get('getJob')
-    async getJob(@GetUser("_id") userId:ObjectId) {
-        const data = await this.jobService.getJob(userId)
-        return data
+export class JobController {
+    constructor( private readonly jobService: JobService) {}
+
+    @Get()
+    async getAll() {
+        return this.jobService.getAll();
+    }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Get('user')
+    async getUserJob(@Req() req: any) {
+        await req.user.populate('jobs')
+        return req.user.jobs
+    }
+
+
+    @Get(':id')
+    async getById(@Param('id') id: string) {
+        return this.jobService.getById(id);
     }
     
-    
-    @Get("get/:id")
-    async getJobById(@Param('id') jobId:ObjectId) {
-        const data = await this.jobService.getJobById(jobId)
-        return data
-    }
-   
-    
+    @UseGuards(PermissionsGuard)
+    @Permissions(Permission.Create)
     @Post('create')
-    async createJob(
-        @GetUser('_id') user:User,
-        @Body() insertJobDto:InsertJobDto
-    ) {
-        const data = await this.jobService.createJob(user,insertJobDto)
-        return data
+    async create(
+        @Body() createJobDto: JobCreateDto,
+        @Req() req: any
+        ) {
+        const userId = req.user._id
+        return this.jobService.create(userId,createJobDto);
     }
-   
-    
-    @Patch('update/:id')
-    async updateJob(
-        @GetUser('_id') user:User,
-        @Param('id') jobId:ObjectId,
-        @Body() updateJobDto:UpdateJobDto
+
+    @UseGuards(PermissionsGuard)
+    @Permissions(Permission.Create)
+    @Patch(':id')
+    async update(
+        @Param('id') id: string,
+        @Body() body: JobUpdateDto
     ) {
-        const data = await  this.jobService.updateJob(user,jobId,updateJobDto)
-        return data
+        return this.jobService.update(id,body);
     }
     
-    
-    @Delete('delete/:id')
-    async deleteJob(
-        @GetUser() user:User,
-        @Param("id")jobId:ObjectId) {
-        const data = await this.jobService.deleteJob(user,jobId)
-        return data
+    @UseGuards(PermissionsGuard)
+    @Permissions(Permission.Create)
+    @Delete(':id')
+    async remove( @Param('id') id: string) {
+        return this.jobService.remove(id);
     }
 }
-
-
-

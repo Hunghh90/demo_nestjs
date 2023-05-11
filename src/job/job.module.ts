@@ -1,22 +1,12 @@
 import { Module } from '@nestjs/common';
 import { JobController } from './job.controller';
 import { JobService } from './job.service';
-import { MongooseModule } from '@nestjs/mongoose';
-import { JwtModule } from '@nestjs/jwt';
 import { Job, JobSchema } from './job.schema';
-import { ConfigModule } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
-    imports:[
-        MongooseModule.forFeature([{name:Job.name, schema:JobSchema}]),
-        JwtModule.register({ global: true,}),
-
-    ],
-    controllers:[
-        JobController
-    ],
-    providers:[
-        JobService
-    ]
+  imports:[MongooseModule.forFeature([{ name: Job.name, schema: JobSchema }])],
+  controllers: [JobController],
+  providers: [JobService]
 })
 export class JobModule {}

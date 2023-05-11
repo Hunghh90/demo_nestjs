@@ -1,32 +1,30 @@
-import { Schema, Prop, SchemaFactory} from "@nestjs/mongoose";
-import { HydratedDocument, ObjectId } from 'mongoose';
-import * as mongoose from 'mongoose';
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import mongoose, { HydratedDocument } from "mongoose";
+import { User } from "../user/user.schema";
+import { Tool } from "src/tool/tool.schema";
 
-
-
-export type JobSchema = HydratedDocument<Job>
-@Schema()
+export type JobDocument = HydratedDocument<Job>
+@Schema({
+	timestamps: {
+		createdAt: 'created_at',
+		updatedAt: 'updated_at',
+	},
+})
 export class Job {
-    // _id: string
-    
-    @Prop()
+
+    @Prop({unique:true})
     title: string
 
     @Prop()
     description: string
 
-    @Prop()
-    email?: string
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User'})
+    userId: User
 
- 
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Tool'})
+    toolId: Tool
 
-    @Prop({ type: mongoose.Schema.Types.ObjectId})
-    userId: ObjectId;
-
-    @Prop()
-    createdAt: Date
-
-    @Prop()
-    updatedAt: Date
+    @Prop({default:1})
+    status: number
 }
-export const JobSchema = SchemaFactory.createForClass(Job);
+export const JobSchema = SchemaFactory.createForClass(Job)

@@ -1,65 +1,48 @@
 import { 
-Controller,
-Get,
-UseGuards,
-Req,
-Patch,
-Post,
-Param,
-Delete,
-Body
- } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
-import { ApiTags } from '@nestjs/swagger';
+    Controller,
+    Get,
+    Post,
+    Patch,
+    Delete,
+    Body,
+    Param,
+    Req,
+    UseGuards
+} from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto, UpdateUserDto } from '././dto'
-import { Request } from 'express';
-import { GetUser } from 'src/auth/decorator';
-import { User } from './user.schema';
-import { ObjectId } from 'mongoose';
-import { AccessTokenGuard } from 'src/common/guards';
+import { UserCreateDto, UserUpdateDto } from './dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('user')
-@ApiTags("User")
-
 export class UserController {
-    constructor(
-        private userService: UserService
-    ) {}
-    @Get('getAll')
+    constructor( private readonly userService: UserService){}
+    
+    @Get()
     async getAll(){
-        const obj = await this.userService.getAll()
-        return obj
+        return this.userService.getAll()
     }
 
-    @Post('create')
-    async create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
-  }
-
-    @Get('getByEmail')
-    async getByEmail(@Body('email') body:string) {
-        
-        const obj = await this.userService.getByEmail(body);
-        return obj
+    @UseGuards(AuthGuard('jwt'))
+    @Get('profile')
+    async profile(@Req() req: any) {
+        return await req.user
     }
 
-    @Get('getById/:id')
-    async getById(@Param('id') id: ObjectId) {
-        const obj = await this.userService.getById(id);
-        return obj
+    @Get(':id')
+    async getById(@Param('id') id: string){
+        return this.userService.getById(id)
     }
-    @UseGuards(AccessTokenGuard)
-    @Patch('update/:id')
-    async update(@Param('id') id: ObjectId, @Body() updateUserDto: UpdateUserDto) {
-        const obj = await this.userService.update(id, updateUserDto);
-        return obj
+
+    @Post()
+    async create(@Body() createUserDto: UserCreateDto) {
+        return this.userService.create(createUserDto)
     }
-    @UseGuards(AccessTokenGuard)
-    @Delete('delete/:id')
-    async remove(@Param('id') id: ObjectId) {
-        const obj = await this.userService.remove(id);
-        return obj
+
+    @UseGuards(AuthGuard('jwt'))
+    @Patch()
+    async update(@Req() req: any, @Body() userUpdateDto: UserUpdateDto) {
+        const email = req.user.email
+        return this.userService.update(email,userUpdateDto);
     }
-   
+
 }
