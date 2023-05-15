@@ -1,15 +1,16 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Job } from './job.schema';
+import * as tmp from 'tmp';
 import 
 { 
     JobCreateDto,
     JobUpdateDto
 } 
 from './dto';
-import { User } from 'src/user/user.schema';
-import path from 'path';
+import { Workbook } from 'exceljs';
+
 
 
 @Injectable()
@@ -17,7 +18,7 @@ export class JobService {
     constructor(@InjectModel(Job.name) private jobModel: Model<Job>) {}
 
     async getAll(): Promise<Job[]> {
-        return this.jobModel.find().populate({path: 'userId', select: 'userName email'}).exec();
+        return this.jobModel.find().populate({path: 'userId', select: 'email'});
     }
 
     async getById(id: string) {
@@ -42,14 +43,14 @@ export class JobService {
         try{
             const checkJob = await this.jobModel.findById(id);
         if(!checkJob) throw new HttpException("Job isn't exists", HttpStatus.BAD_REQUEST);
-        const job = await this.jobModel.findByIdAndUpdate(id, jobUpdateDto, {new:true});
+        const job = await this.jobModel.findByIdAndUpdate(id, jobUpdateDto, {new: true});
         return job;
         }catch(e) {
             throw new HttpException("Job isn't exists", HttpStatus.BAD_REQUEST)
         }
     }
 
-    async remove(id: string) {
+    async remove(id: any) {
         try{
             const checkJob = await this.jobModel.findById(id);
         if(!checkJob) throw new HttpException("Job isn't exists", HttpStatus.BAD_REQUEST);
@@ -58,5 +59,31 @@ export class JobService {
         }catch(e) {
             throw new HttpException("Job isn't exists", HttpStatus.BAD_REQUEST)
         }
+    }
+
+    async downloadExcel() {
+        const job = await this.jobModel.find();
+        console.log(job)
+        if(!job) throw new HttpException('Not data to download', HttpStatus.NOT_FOUND);
+        const rows = [];
+        job.forEach(doc=> {
+            rows.push(Object.values(doc));
+        })
+        const workBook = new Workbook;
+        const workSheet = workBook.addWorksheet('Sheet1');
+        rows.unshift(Object.keys(job[0]));
+        workSheet.addRow(rows);
+        const File = await new Promise((resolve, rejects)=> {
+            tmp.file({discardDescriptor: true, prefix: 'MyExcelSheet', postfix: '.xlsx', mode: parseInt('0600', 8)},
+            async (err,file)=> {
+                console.log(file)
+                if(err) throw new BadRequestException(err);
+                workBook.xlsx.writeFile(file)
+                .then(_ =>{
+                    resolve(file)
+                }).catch(err=> {throw new BadRequestException(err)});
+            });
+        })
+        return File;
     }
 }

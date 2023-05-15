@@ -1,8 +1,7 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import mongoose, { HydratedDocument, ObjectId } from "mongoose";
+import { softDeletePlugin } from "soft-delete-plugin-mongoose";
 import { Permission } from "src/enum/permission.enum";
-
-import { Job } from "src/job/job.schema";
 
 import { Role } from "src/role/role.schema";
 

@@ -1,6 +1,4 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import mongoose from "mongoose";
-import { Permission } from "../permission/permission.schema";
 
 @Schema({
     timestamps: {

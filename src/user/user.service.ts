@@ -9,7 +9,7 @@ export class UserService {
     constructor( @InjectModel(User.name) private userModel : Model<User>){}
 
     async getAll(): Promise<User[]> {
-        return this.userModel.find().exec();
+        return this.userModel.find();
         
     }
 

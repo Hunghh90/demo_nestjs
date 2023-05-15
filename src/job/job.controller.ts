@@ -7,7 +7,12 @@ import {
     Body,
     Param,
     UseGuards,
-    Req
+    Req,
+    UseInterceptors,
+    UploadedFile,
+    UploadedFiles,
+    Res,
+    Header
 } from '@nestjs/common';
 import { JobService } from './job.service';
 import { 
@@ -18,14 +23,20 @@ import { AuthGuard } from '@nestjs/passport';
 import { Permission } from 'src/enum/permission.enum';
 import { PermissionsGuard } from 'src/guard/permission-guard.guard';
 import { Permissions } from 'src/decorator/permission-decorator.decorator';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import multer from 'multer';
+import { multerOptions } from 'src/config/multer-config.config';
+import { ConfigService } from '@nestjs/config';
+import { Response } from 'express';
 
 
-@UseGuards(AuthGuard('jwt'))
+
+// @UseGuards(AuthGuard('jwt'))
 @Controller('job')
 export class JobController {
-    constructor( private readonly jobService: JobService) {}
+    constructor( private readonly jobService: JobService, private configService: ConfigService) {}
 
-    @Get()
+    @Get('download1')
     async getAll() {
         return this.jobService.getAll();
     }
@@ -54,6 +65,33 @@ export class JobController {
         return this.jobService.create(userId,createJobDto);
     }
 
+    @Get('image/:imgpath')
+        seeUploadedFile(@Param('imgpath') image, @Res() res) {
+        return res.sendFile(image, { root: this.configService.get<string>('DEST') });
+    }
+
+    @Post('upload')
+    @UseInterceptors(FileInterceptor('file'))
+    async upload(@UploadedFile() file) {
+        return file;
+    }
+
+    @Post('multiple')
+    @UseInterceptors(FilesInterceptor('image', 20))
+    async uploadMultipleFiles(@UploadedFiles() image) {
+        return image;
+    }
+
+    @Get()
+    @Header('Content-Type', 'text/xlsx')
+    async downloadExcel(@Res() res: Response) {
+        const rs = await this.jobService.downloadExcel();
+        res.download(`${rs}`);
+
+    }
+
+
+
     @UseGuards(PermissionsGuard)
     @Permissions(Permission.Create)
     @Patch(':id')
@@ -65,7 +103,7 @@ export class JobController {
     }
 
     @UseGuards(PermissionsGuard)
-    @Permissions(Permission.Create)
+    @Permissions(Permission.Delete)
     @Delete(':id')
     async remove( @Param('id') id: any) {
         return this.jobService.remove(id);
