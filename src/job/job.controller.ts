@@ -27,7 +27,7 @@ import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import multer from 'multer';
 import { multerOptions } from 'src/config/multer-config.config';
 import { ConfigService } from '@nestjs/config';
-import { Response } from 'express';
+import { Response, Request } from 'express';
 
 
 
@@ -36,7 +36,7 @@ import { Response } from 'express';
 export class JobController {
     constructor( private readonly jobService: JobService, private configService: ConfigService) {}
 
-    @Get('download1')
+    @Get()
     async getAll() {
         return this.jobService.getAll();
     }
@@ -72,8 +72,10 @@ export class JobController {
 
     @Post('upload')
     @UseInterceptors(FileInterceptor('file'))
-    async upload(@UploadedFile() file) {
-        return file;
+    async upload(
+        @UploadedFile() file,
+        ) {
+        return this.jobService.uploadFile(file);
     }
 
     @Post('multiple')
@@ -82,15 +84,13 @@ export class JobController {
         return image;
     }
 
-    @Get()
-    @Header('Content-Type', 'text/xlsx')
-    async downloadExcel(@Res() res: Response) {
-        const rs = await this.jobService.downloadExcel();
-        res.download(`${rs}`);
+    // @Get()
+    // @Header('Content-Type', 'text/xlsx')
+    // async downloadExcel(@Res() res: Response) {
+    //     const rs = await this.jobService.downloadExcel();
+    //     res.download(`${rs}`);
 
-    }
-
-
+    // }
 
     @UseGuards(PermissionsGuard)
     @Permissions(Permission.Create)

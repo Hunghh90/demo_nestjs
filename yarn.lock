@@ -1463,6 +1463,11 @@
     "@webassemblyjs/ast" "1.11.5"
     "@xtuc/long" "4.2.2"
 
+"@xmldom/xmldom@^0.8.2":
+  version "0.8.7"
+  resolved "https://registry.npmjs.org/@xmldom/xmldom/-/xmldom-0.8.7.tgz"
+  integrity sha512-sI1Ly2cODlWStkINzqGrZ8K6n+MTSbAeQnAipGyL+KZCXuHaRlj2gyyy8B/9MvsFFqN7XHryQnB2QwhzvJXovg==
+
 "@xtuc/ieee754@^1.2.0":
   version "1.2.0"
   resolved "https://registry.npmjs.org/@xtuc/ieee754/-/ieee754-1.2.0.tgz"
@@ -2886,6 +2891,11 @@ fb-watchman@^2.0.0:
   integrity sha512-p5161BqbuCaSnB8jIbzQHOlpgsPmK5rJVDfDKO91Axs5NC1uu3HRQm6wt9cd9/+GtQQIO53JdGXXoyDpTAsgYA==
   dependencies:
     bser "2.1.1"
+
+fflate@^0.7.3:
+  version "0.7.4"
+  resolved "https://registry.npmjs.org/fflate/-/fflate-0.7.4.tgz"
+  integrity sha512-5u2V/CDW15QM1XbbgS+0DfPxVB+jUKhWEKuuFuHncbk3tEEqzmoXL+2KyOFuKGqOnmdIy0/davWF1CkuwtibCw==
 
 figures@^3.0.0:
   version "3.2.0"
@@ -4991,6 +5001,15 @@ react-is@^18.0.0:
   version "18.2.0"
   resolved "https://registry.npmjs.org/react-is/-/react-is-18.2.0.tgz"
   integrity sha512-xWGDIW6x921xtzPkhiULtthJHoJvBbF3q26fzloPCK0hsvxtPVelvftw3zjbHWSkR2km9Z+4uxbDDK/6Zw9B8w==
+
+read-excel-file@^5.6.1:
+  version "5.6.1"
+  resolved "https://registry.npmjs.org/read-excel-file/-/read-excel-file-5.6.1.tgz"
+  integrity sha512-Gwms2Knx8OzAs8ggUIv9wvJJ6VGwtxkN/BmLczIzlA79ykjisAaKewdQFfrvinmyh3sfHN+ARw1R6y6szsto3g==
+  dependencies:
+    "@xmldom/xmldom" "^0.8.2"
+    fflate "^0.7.3"
+    unzipper "^0.10.11"
 
 readable-stream@^2.0.0, readable-stream@^2.0.2, readable-stream@^2.0.5, readable-stream@^2.2.2, readable-stream@^2.3.5, readable-stream@~2.3.6:
   version "2.3.8"

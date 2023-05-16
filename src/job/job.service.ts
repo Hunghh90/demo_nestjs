@@ -10,6 +10,10 @@ import
 } 
 from './dto';
 import { Workbook } from 'exceljs';
+import { Request, Response } from 'express';
+import { File } from 'buffer';
+import readXlsxFile from 'read-excel-file/node';
+import { Console } from 'console';
 
 
 
@@ -61,29 +65,57 @@ export class JobService {
         }
     }
 
-    async downloadExcel() {
-        const job = await this.jobModel.find();
-        console.log(job)
-        if(!job) throw new HttpException('Not data to download', HttpStatus.NOT_FOUND);
-        const rows = [];
-        job.forEach(doc=> {
-            rows.push(Object.values(doc));
-        })
-        const workBook = new Workbook;
-        const workSheet = workBook.addWorksheet('Sheet1');
-        rows.unshift(Object.keys(job[0]));
-        workSheet.addRow(rows);
-        const File = await new Promise((resolve, rejects)=> {
-            tmp.file({discardDescriptor: true, prefix: 'MyExcelSheet', postfix: '.xlsx', mode: parseInt('0600', 8)},
-            async (err,file)=> {
-                console.log(file)
-                if(err) throw new BadRequestException(err);
-                workBook.xlsx.writeFile(file)
-                .then(_ =>{
-                    resolve(file)
-                }).catch(err=> {throw new BadRequestException(err)});
-            });
-        })
-        return File;
+    // async downloadExcel() {
+    //     const job = await this.jobModel.find();
+    //     if(!job) throw new HttpException('Not data to download', HttpStatus.NOT_FOUND);
+    //     const rows = [];
+    //     job.forEach(doc=> {
+    //         rows.push(Object.values(doc));
+    //     })
+    //     const workBook = new Workbook;
+    //     const workSheet = workBook.addWorksheet('Sheet1');
+    //     rows.unshift(Object.keys(job[0]));
+    //     workSheet.addRow(rows);
+    //     const File = await new Promise((resolve, rejects)=> {
+    //         tmp.file({discardDescriptor: true, prefix: 'MyExcelSheet', postfix: '.xlsx', mode: parseInt('0600', 8)},
+    //         async (err,file)=> {
+    //             console.log(file)
+    //             if(err) throw new BadRequestException(err);
+    //             workBook.xlsx.writeFile(file)
+    //             .then(_ =>{
+    //                 resolve(file)
+    //             }).catch(err=> {throw new BadRequestException(err)});
+    //         });
+    //     })
+    //     return File;
+    // }
+
+    async uploadFile(file) {
+        try{
+            readXlsxFile(file.path).then((rows)=> {
+                rows.shift();
+                const jobs= [];
+                console.log(rows)
+                Array.from(new Set(rows))
+                console.log(Array.from(new Set(rows)))
+                rows.forEach(async (row)=>{
+                    const job = {
+                        title: row[0],
+                        description: row[1],
+                    };
+                    // const excelJob = await new this.jobModel(job);
+                    // await excelJob.save().then(rs=>{
+                    //     return {
+                    //         statuscode:200,
+                    //         message: "Uploaded the file successfully: " + file.originalname, 
+                    //     }
+                    // }).catch(e=>{
+                    //     throw new HttpException("Could not upload the file"+ file.originalname , HttpStatus.BAD_REQUEST)
+                    // })
+                });
+            })
+        } catch (error) {
+            throw new HttpException("Could not upload the file", HttpStatus.BAD_REQUEST)
+        }
     }
 }
