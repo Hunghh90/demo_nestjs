@@ -95,22 +95,34 @@ export class JobService {
             readXlsxFile(file.path).then((rows)=> {
                 rows.shift();
                 const jobs = this.deduplicate(rows)
-                
-                console.log(rows,jobs)
-                
+                const check = this.jobModel.find()
                 jobs.forEach(async (row)=>{
-                    const job = {
-                        title: row[0],
-                        description: row[1],
-                    };
-                    const check = this.jobModel.find();
-                    (await check).forEach(async (element)=> {
-                        if(await job.title !== element.title) {
-                            
+                    
+                    
+                    ;(await check).forEach(async (element)=>{
+                        
+                        if(await row[0] !== element.title) {
+                        
+                            // const job = {
+                            //     title: row[0],
+                            //     description: row[1],
+                            // };
+                            // const excelJob = await new this.jobModel(job);
+                            // await excelJob.save()
                         }
-                        const excelJob = await new this.jobModel(job);
-                            await excelJob.save()
+                        
                     })
+                    
+                    
+                    
+                    
+                    // (await check).forEach(async (element)=> {
+                    //     if(await job.title !== element.title) {
+                            
+                    //     }
+                    //     const excelJob = await new this.jobModel(job);
+                    //         await excelJob.save()
+                    // })
                   
                     // const excelJob = await new this.jobModel(job);
                     // await excelJob.save().then(rs=>{
@@ -122,6 +134,7 @@ export class JobService {
                     //     throw new HttpException("Could not upload the file"+ file.originalname , HttpStatus.BAD_REQUEST)
                     // })
                 });
+                
             })
         } catch (error) {
             throw new HttpException("Could not upload the file", HttpStatus.BAD_REQUEST)
