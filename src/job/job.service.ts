@@ -94,15 +94,24 @@ export class JobService {
         try{
             readXlsxFile(file.path).then((rows)=> {
                 rows.shift();
-                const jobs= [];
-                console.log(rows)
-                Array.from(new Set(rows))
-                console.log(Array.from(new Set(rows)))
-                rows.forEach(async (row)=>{
+                const jobs = this.deduplicate(rows)
+                
+                console.log(rows,jobs)
+                
+                jobs.forEach(async (row)=>{
                     const job = {
                         title: row[0],
                         description: row[1],
                     };
+                    const check = this.jobModel.find();
+                    (await check).forEach(async (element)=> {
+                        if(await job.title !== element.title) {
+                            
+                        }
+                        const excelJob = await new this.jobModel(job);
+                            await excelJob.save()
+                    })
+                  
                     // const excelJob = await new this.jobModel(job);
                     // await excelJob.save().then(rs=>{
                     //     return {
@@ -118,4 +127,17 @@ export class JobService {
             throw new HttpException("Could not upload the file", HttpStatus.BAD_REQUEST)
         }
     }
+    isExist = (arr, x) => {
+        for (let i = 0; i < arr.length; i++) {
+          if (arr[i][0] === x) return true;
+        }
+        return false;
+      };
+    deduplicate(arr) {
+        let ans = [];
+        arr.forEach((element) => {
+          if (!this.isExist(ans, element[0])) ans.push(element);
+        });
+        return ans;
+      }
 }
