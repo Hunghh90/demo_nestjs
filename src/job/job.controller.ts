@@ -28,6 +28,7 @@ import multer from 'multer';
 import { multerOptions } from 'src/config/multer-config.config';
 import { ConfigService } from '@nestjs/config';
 import { Response, Request } from 'express';
+import { MIMEType } from 'util';
 
 
 
@@ -74,8 +75,9 @@ export class JobController {
     @UseInterceptors(FileInterceptor('file'))
     async upload(
         @UploadedFile() file,
+        @Req() req:Request
         ) {
-        return this.jobService.uploadFile(file);
+        return this.jobService.uploadFile(file,req);
     }
 
     @Post('multiple')

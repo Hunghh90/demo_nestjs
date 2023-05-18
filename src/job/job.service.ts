@@ -1,4 +1,4 @@
-import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Job } from './job.schema';
@@ -9,11 +9,12 @@ import
     JobUpdateDto
 } 
 from './dto';
-import { Workbook } from 'exceljs';
+
 import { Request, Response } from 'express';
-import { File } from 'buffer';
+
 import readXlsxFile from 'read-excel-file/node';
-import { Console } from 'console';
+
+
 
 
 
@@ -22,7 +23,10 @@ export class JobService {
     constructor(@InjectModel(Job.name) private jobModel: Model<Job>) {}
 
     async getAll(): Promise<Job[]> {
-        return this.jobModel.find().populate({path: 'userId', select: 'email'});
+        const abc = await this.jobModel.find().populate({path: 'userId', select: 'email'});
+        console.log(abc)
+        return abc
+        
     }
 
     async getById(id: string) {
@@ -90,67 +94,66 @@ export class JobService {
     //     return File;
     // }
 
-    async uploadFile(file) {
-        try{
-            readXlsxFile(file.path).then((rows)=> {
-                rows.shift();
-                const jobs = this.deduplicate(rows)
-                const check = this.jobModel.find()
-                jobs.forEach(async (row)=>{
-                    
-                    
-                    ;(await check).forEach(async (element)=>{
-                        
-                        if(await row[0] !== element.title) {
-                        
-                            // const job = {
-                            //     title: row[0],
-                            //     description: row[1],
-                            // };
-                            // const excelJob = await new this.jobModel(job);
-                            // await excelJob.save()
-                        }
-                        
-                    })
-                    
-                    
-                    
-                    
-                    // (await check).forEach(async (element)=> {
-                    //     if(await job.title !== element.title) {
-                            
-                    //     }
-                    //     const excelJob = await new this.jobModel(job);
-                    //         await excelJob.save()
-                    // })
-                  
-                    // const excelJob = await new this.jobModel(job);
-                    // await excelJob.save().then(rs=>{
-                    //     return {
-                    //         statuscode:200,
-                    //         message: "Uploaded the file successfully: " + file.originalname, 
-                    //     }
-                    // }).catch(e=>{
-                    //     throw new HttpException("Could not upload the file"+ file.originalname , HttpStatus.BAD_REQUEST)
-                    // })
+    async uploadFile(file: Express.Multer.File, req:Request) {
+        if(file.mimetype.match('docx|doc|xlsx|xls')){
+            try{
+                const schema = {
+                    title: {
+                        type: String,
+                        prop: 'title'
+                    },
+                    description: {
+                        type: String,
+                        prop: 'description'
+                    }
+                }
+                const { rows } = await readXlsxFile(file.path, {
+                    schema,                 
+                    transformData(rows) {
+                      const rowsData = rows.slice(1);
+                      const data = [
+                        [
+                          'title',
+                          'description',
+                        ],
+                        ...rowsData,
+                      ];
+                      return data;
+                    },
                 });
                 
-            })
-        } catch (error) {
-            throw new HttpException("Could not upload the file", HttpStatus.BAD_REQUEST)
+                const add = [];
+                const duplicate = [];
+                const alreadyExists = [];
+                const deduplicate = [];
+                for(let i = 0;i<rows.length;i++){
+                    if (!this.isExist(deduplicate, rows[i]['title'])) {
+                        deduplicate.push(rows[i]);
+                        const checktitle  = await this.jobModel.findOne({title: rows[i]['title']})
+                        if(await !checktitle) {                                              
+                            const jobs = await new this.jobModel(rows[i]);
+                            await jobs.save()
+                            add.push(rows[i]);  
+                        } else {
+                            alreadyExists.push(rows[i]);
+                        }
+                    } else {
+                        console.log(rows[i])
+                        duplicate.push(rows[i]);
+                    }
+                }
+                return [add,duplicate,alreadyExists]
+            } catch (error) {
+                throw new HttpException("Could not upload the file", HttpStatus.BAD_REQUEST)
+            }
+        }else{
+            return file
         }
     }
     isExist = (arr, x) => {
         for (let i = 0; i < arr.length; i++) {
-          if (arr[i][0] === x) return true;
+            if (arr[i]['title'] === x) return true;
         }
         return false;
-      };
-    deduplicate(arr) {
-        let ans = [];
-        arr.forEach((element) => {
-          if (!this.isExist(ans, element[0])) ans.push(element);
-        });
-        return ans;
-      }
+    };
 }
