@@ -138,7 +138,6 @@ export class JobService {
                             alreadyExists.push(rows[i]);
                         }
                     } else {
-                        console.log(rows[i])
                         duplicate.push(rows[i]);
                     }
                 }
